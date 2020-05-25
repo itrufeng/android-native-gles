@@ -1,7 +1,5 @@
 #include <EGL/egl.h>
-#include <EGL/eglext.h>
 #include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
 
 #include <android/log.h>
 #include <android/asset_manager.h>
@@ -25,6 +23,13 @@ struct engine {
     EGLSurface surface;
     EGLContext context;
 };
+
+static void checkMaxVertexAttribs() {
+    GLint vertexAttribs;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &vertexAttribs);
+
+    LOGI("Max vertex attrs is: %d", vertexAttribs);
+}
 
 void read_shader_source(struct engine* engine, char* path, char* out_source) {
     AAssetManager* mgr = engine->app->activity->assetManager;
@@ -119,13 +124,14 @@ void init(struct engine* engine) {
             0.0f,  0.5f, 0.0f
     };
 
-    GLuint VBO;
-    glGenBuffers(1, &VBO);
+//    GLuint VBO;
+//    glGenBuffers(1, &VBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
     glEnableVertexAttribArray(0);
 }
 
@@ -134,9 +140,15 @@ void init(struct engine* engine) {
  */
 static int engine_init_display(struct engine* engine) {
     // initialize OpenGL and EGL
+    EGLint majorVersion;
+    EGLint minorVersion;
+    GLboolean eglInitializeState;
+
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    eglInitialize(display, 0, 0);
+    eglInitializeState = eglInitialize(display, &majorVersion, &minorVersion);
     engine->display = display;
+
+    LOGI("EGL initial result: %d & version: %d.%d", eglInitializeState, majorVersion, minorVersion);
 
     EGLConfig config;
     const EGLint attrs[] = {
@@ -163,6 +175,8 @@ static int engine_init_display(struct engine* engine) {
     }
 
     init(engine);
+
+    checkMaxVertexAttribs();
 
     return 0;
 }

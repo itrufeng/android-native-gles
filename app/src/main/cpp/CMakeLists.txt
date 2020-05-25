@@ -39,9 +39,9 @@ set(
 target_link_libraries(
         native-lib
 
+        GLESv3
         android
-        log
         EGL
-        GLESv2
+        log
         android_native_app_glue
 )

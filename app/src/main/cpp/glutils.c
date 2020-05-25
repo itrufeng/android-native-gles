@@ -40,7 +40,7 @@ const char *EGLstrerror(EGLint err) {
 }
 int32_t selectConfigForPixelFormat(EGLDisplay dpy, EGLint const* attrs,
                                    int32_t format, EGLConfig* outConfig) {
-    EGLint numConfigs = -1, n=0;
+    EGLint numConfigs = -1, n = 0;
     if (!attrs)
         return -1;
     if (outConfig == NULL)
@@ -97,9 +97,6 @@ int32_t selectConfigForPixelFormat(EGLDisplay dpy, EGLint const* attrs,
 }
 int32_t selectConfigForNativeWindow(EGLDisplay dpy, EGLint const* attrs,
                                     EGLNativeWindowType window, EGLConfig* outConfig) {
-    int err;
-    int format;
-
     if (!window)
         return -1;
 
