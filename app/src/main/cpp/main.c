@@ -9,10 +9,9 @@
 #include <android_native_app_glue.h>
 #include <malloc.h>
 #include "glutils.h"
+#include "log.h"
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
+static const char* TAG = "native-lib.main";
 
 /**
  * Shared state for our app.
@@ -28,7 +27,7 @@ static void checkMaxVertexAttribs() {
     GLint vertexAttribs;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &vertexAttribs);
 
-    LOGI("Max vertex attrs is: %d", vertexAttribs);
+    logI(TAG, "Max vertex attrs is: %d", vertexAttribs);
 }
 
 void read_shader_source(struct engine* engine, char* path, char* out_source) {
@@ -40,8 +39,8 @@ void read_shader_source(struct engine* engine, char* path, char* out_source) {
 }
 
 void init(struct engine* engine) {
-    LOGI("OpenGLES only support version: %s", glGetString(GL_VERSION));
-    LOGI("OpenGLES shader only support version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    logI(TAG, "OpenGLES only support version: %s", glGetString(GL_VERSION));
+    logI(TAG, "OpenGLES shader only support version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     char vertex_shader_source_buffer[1024];
     memset(vertex_shader_source_buffer, '\0', 1024);
@@ -55,14 +54,14 @@ void init(struct engine* engine) {
     glCompileShader(vertex_shader);
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_shader_compile_status);
     if (!vertex_shader_compile_status) {
-        LOGE("vertex_shader_compile_status: %d", vertex_shader_compile_status);
+        logE(TAG, "vertex_shader_compile_status: %d", vertex_shader_compile_status);
 
         GLint length = 0;
         glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &length);
 
         GLchar log[length];
         glGetShaderInfoLog(vertex_shader, length, &length, &log);
-        LOGE("vertex_shader_compile_log: %s", log);
+        logE(TAG, "vertex_shader_compile_log: %s", log);
 
         glDeleteShader(vertex_shader);
         return;
@@ -80,14 +79,14 @@ void init(struct engine* engine) {
     glCompileShader(fragment_shader);
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_shader_compile_status);
     if (!fragment_shader_compile_status) {
-        LOGE("fragment_shader_compile_status: %d", fragment_shader_compile_status);
+        logE(TAG, "fragment_shader_compile_status: %d", fragment_shader_compile_status);
 
         GLint length = 0;
         glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &length);
 
         GLchar log[length];
         glGetShaderInfoLog(fragment_shader, length, &length, &log);
-        LOGE("fragment_shader_compile_status_log: %s", log);
+        logE(TAG, "fragment_shader_compile_status_log: %s", log);
 
         glDeleteShader(fragment_shader);
         return;
@@ -101,14 +100,14 @@ void init(struct engine* engine) {
     glLinkProgram(shader_program);
     glGetProgramiv(shader_program, GL_LINK_STATUS, &shader_program_link_status);
     if (!shader_program_link_status) {
-        LOGE("shader_program_link_status: %d", shader_program_link_status);
+        logE(TAG, "shader_program_link_status: %d", shader_program_link_status);
 
         GLint length = 0;
         glGetProgramiv(shader_program, GL_INFO_LOG_LENGTH, &length);
 
         GLchar* log;
         glGetProgramInfoLog(shader_program, length, &length, &log);
-        LOGE("shader_program_link_status_log: %s", log);
+        logE(TAG, "shader_program_link_status_log: %s", log);
 
         glDeleteProgram(shader_program);
         return;
@@ -148,7 +147,7 @@ static int engine_init_display(struct engine* engine) {
     eglInitializeState = eglInitialize(display, &majorVersion, &minorVersion);
     engine->display = display;
 
-    LOGI("EGL initial result: %d & version: %d.%d", eglInitializeState, majorVersion, minorVersion);
+    logI(TAG, "EGL initial result: %d & version: %d.%d", eglInitializeState, majorVersion, minorVersion);
 
     EGLConfig config;
     const EGLint attrs[] = {
@@ -170,7 +169,7 @@ static int engine_init_display(struct engine* engine) {
     engine->context = context;
 
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
-        LOGW("Unable to eglMakeCurrent");
+        logE(TAG, "Unable to eglMakeCurrent");
         return -1;
     }
 

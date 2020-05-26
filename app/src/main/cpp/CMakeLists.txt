@@ -17,6 +17,7 @@ add_library(
 
         main.c
         glutils.c
+        log.c
 )
 
 include_directories(

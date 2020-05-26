@@ -17,6 +17,9 @@
 #include "glutils.h"
 #include <string.h>
 #include <malloc.h>
+#include "log.h"
+
+static const char* TAG = "native-lib.glutils";
 
 const char *EGLstrerror(EGLint err) {
     switch (err) {
@@ -58,18 +61,18 @@ int32_t selectConfigForPixelFormat(EGLDisplay dpy, EGLint const* attrs,
             fbSzA = 0; fbSzR = 5; fbSzG = 6; fbSzB = 5;
             break;
         default:
-            LOGW("Unknown format");
+            logW(TAG, "Unknown format");
             return -1;
     }
     // Get all the "potential match" configs...
     if (eglGetConfigs(dpy, NULL, 0, &numConfigs) == EGL_FALSE) {
-        LOGW("eglGetConfigs failed");
+        logW(TAG, "eglGetConfigs failed");
         return -1;
     }
     EGLConfig* const configs = (EGLConfig*)malloc(sizeof(EGLConfig)*numConfigs);
     if (eglChooseConfig(dpy, attrs, configs, numConfigs, &n) == EGL_FALSE) {
         free(configs);
-        LOGW("eglChooseConfig failed");
+        logW(TAG, "eglChooseConfig failed");
         return -1;
     }
     int i;
@@ -92,7 +95,7 @@ int32_t selectConfigForPixelFormat(EGLDisplay dpy, EGLint const* attrs,
         *outConfig = config;
         return 0;
     }
-    LOGW("No config with desired pixel format");
+    logW(TAG, "No config with desired pixel format");
     return -1;
 }
 int32_t selectConfigForNativeWindow(EGLDisplay dpy, EGLint const* attrs,

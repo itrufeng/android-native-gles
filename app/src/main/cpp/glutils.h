@@ -19,12 +19,9 @@
 #define NATIVEGL_GLUTILS_H
 
 #include <android/native_activity.h>
-#include <android/log.h>
 #include <EGL/egl.h>
 #include <GLES/gl.h>
-#include <GLES/glext.h>
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-lib", __VA_ARGS__))
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-lib", __VA_ARGS__))
+
 extern const char *EGLstrerror(EGLint err);
 extern int32_t selectConfigForPixelFormat(EGLDisplay dpy, EGLint const* attrs,
                                           int32_t format, EGLConfig* outConfig);
