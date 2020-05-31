@@ -15,9 +15,9 @@ add_library(
 
         SHARED
 
-        main.c
-        glutils.c
-        log.c
+        main.cpp
+        Engine.cpp
+        Log.cpp
 )
 
 include_directories(
