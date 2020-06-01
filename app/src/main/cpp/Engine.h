@@ -8,12 +8,20 @@
 #include <EGL/egl.h>
 
 namespace nativelib {
+
+    class EGLHelper;
+
     class Engine {
     public:
+        Engine();
         struct android_app* app;
         EGLDisplay display;
         EGLSurface surface;
         EGLContext context;
+
+        int engine_init_display();
+    private:
+        EGLHelper* helper;
     };
 }
 
