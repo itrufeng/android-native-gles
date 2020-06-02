@@ -12,14 +12,14 @@ using namespace nativelib;
 /**
  * Process the next input event.
  */
-static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) {
+static int32_t handle_input(struct android_app* app, AInputEvent* event) {
     return 0;
 }
 
 /**
  * Process the next main command.
  */
-static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
+static void handle_cmd(struct android_app* app, int32_t cmd) {
     Engine* engine = (Engine*)(app->userData);
     switch (cmd) {
         case APP_CMD_SAVE_STATE:
@@ -49,8 +49,8 @@ void android_main(struct android_app* state) {
     // Make sure glue isn't stripped.
     app_dummy();
     state->userData = engine;
-    state->onAppCmd = engine_handle_cmd;
-    state->onInputEvent = engine_handle_input;
+    state->onAppCmd = handle_cmd;
+    state->onInputEvent = handle_input;
     engine->app = state;
     // loop waiting for stuff to do.
     while (1) {
