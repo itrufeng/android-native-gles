@@ -13,7 +13,7 @@ namespace nativelib {
 
     class EGLHelper {
     public:
-        int engine_init_display(Engine *engine);
+        int init_display(Engine *engine);
 
     private:
         int32_t selectConfigForPixelFormat(EGLDisplay dpy, EGLint const *attrs,

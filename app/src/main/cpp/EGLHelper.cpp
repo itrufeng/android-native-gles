@@ -9,7 +9,7 @@
 #include "Log.h"
 #include "Engine.h"
 
-int nativelib::EGLHelper::engine_init_display(Engine *engine) {
+int nativelib::EGLHelper::init_display(Engine *engine) {
     // initialize OpenGL and EGL
     EGLint majorVersion;
     EGLint minorVersion;

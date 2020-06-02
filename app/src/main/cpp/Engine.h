@@ -6,6 +6,7 @@
 #define ANDROID_NATIVE_GLES_ENGINE_H
 
 #include <EGL/egl.h>
+#include <android_native_app_glue.h>
 
 namespace nativelib {
 
@@ -19,9 +20,14 @@ namespace nativelib {
         EGLSurface surface;
         EGLContext context;
 
-        int engine_init_display();
+        int init_display();
+        int destroy_display();
+        void prepare();
+        void draw_frame();
+        bool isAppWindowCreated();
     private:
         EGLHelper* helper;
+        void read_shader_source(char* path, char* out_source);
     };
 }
 
