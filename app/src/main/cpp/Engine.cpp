@@ -11,6 +11,7 @@
 
 nativelib::Engine::Engine() {
     helper = new EGLHelper();
+    logger = new Log("NativeGL.main");
 }
 
 int nativelib::Engine::init_display() {
@@ -20,7 +21,7 @@ int nativelib::Engine::init_display() {
 /**
  * Tear down the EGL context currently associated with the display.
  */
-int nativelib::Engine::destroy_display() {
+void nativelib::Engine::destroy_display() {
     if (this->display != EGL_NO_DISPLAY) {
         eglMakeCurrent(this->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         if (this->context != EGL_NO_CONTEXT) {
@@ -51,9 +52,8 @@ void nativelib::Engine::draw_frame() {
 }
 
 void nativelib::Engine::prepare() {
-    auto logger = Log("NativeGL.main");
-    logger.i("OpenGLES only support version: %s", glGetString(GL_VERSION));
-    logger.i("OpenGLES shader only support version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    logger->i("OpenGLES only support version: %s", glGetString(GL_VERSION));
+    logger->i("OpenGLES shader only support version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     char vertex_shader_source_buffer[1024];
     memset(vertex_shader_source_buffer, '\0', 1024);
@@ -61,24 +61,7 @@ void nativelib::Engine::prepare() {
     const GLchar* vertex_shader_source = vertex_shader_source_buffer;
 
     GLuint vertex_shader;
-    GLint vertex_shader_compile_status = GL_FALSE;
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-    glCompileShader(vertex_shader);
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_shader_compile_status);
-    if (!vertex_shader_compile_status) {
-        logger.e("vertex_shader_compile_status: %d", vertex_shader_compile_status);
-
-        GLint length = 0;
-        glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &length);
-
-        GLchar log[length];
-        glGetShaderInfoLog(vertex_shader, length, &length, log);
-        logger.e("vertex_shader_compile_log: %s", log);
-
-        glDeleteShader(vertex_shader);
-        return;
-    }
+    this->CreateShader(&vertex_shader_source, GL_VERTEX_SHADER, &vertex_shader);
 
     char fragment_shader_source_buffer[1024];
     memset(fragment_shader_source_buffer, '\0', 1024);
@@ -86,45 +69,10 @@ void nativelib::Engine::prepare() {
     GLchar* fragment_shader_source = fragment_shader_source_buffer;
 
     GLuint fragment_shader;
-    GLint fragment_shader_compile_status = GL_FALSE;
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-    glCompileShader(fragment_shader);
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_shader_compile_status);
-    if (!fragment_shader_compile_status) {
-        logger.e("fragment_shader_compile_status: %d", fragment_shader_compile_status);
-
-        GLint length = 0;
-        glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &length);
-
-        GLchar log[length];
-        glGetShaderInfoLog(fragment_shader, length, &length, log);
-        logger.e("fragment_shader_compile_status_log: %s", log);
-
-        glDeleteShader(fragment_shader);
-        return;
-    }
+    this->CreateShader(&fragment_shader_source, GL_FRAGMENT_SHADER, &fragment_shader);
 
     GLuint shader_program;
-    GLint shader_program_link_status = GL_FALSE;
-    shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-    glLinkProgram(shader_program);
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &shader_program_link_status);
-    if (!shader_program_link_status) {
-        logger.e("shader_program_link_status: %d", shader_program_link_status);
-
-        GLint length = 0;
-        glGetProgramiv(shader_program, GL_INFO_LOG_LENGTH, &length);
-
-        GLchar* log;
-        glGetProgramInfoLog(shader_program, length, &length, log);
-        logger.e("shader_program_link_status_log: %s", log);
-
-        glDeleteProgram(shader_program);
-        return;
-    }
+    this->CreateProgram(vertex_shader, fragment_shader, &shader_program);
 
     glUseProgram(shader_program);
     glDeleteShader(vertex_shader);
@@ -151,11 +99,54 @@ bool nativelib::Engine::isAppWindowCreated() {
     return this->app->window != NULL;
 }
 
-void nativelib::Engine::read_shader_source(char *path, char *out_source) {
+void nativelib::Engine::read_shader_source(string path, char *out_source) {
     AAssetManager* mgr = this->app->activity->assetManager;
-    AAsset *asset = AAssetManager_open(mgr, path, AASSET_MODE_BUFFER);
+    AAsset *asset = AAssetManager_open(mgr, path.c_str(), AASSET_MODE_BUFFER);
     off64_t length = AAsset_getLength64(asset);
     AAsset_read(asset, out_source, length);
     AAsset_close(asset);
+}
+
+void nativelib::Engine::CreateShader(const GLchar *const*source, GLenum type, GLuint* shader) {
+    GLint vertex_shader_compile_status = GL_FALSE;
+    *shader = glCreateShader(type);
+    glShaderSource(*shader, 1, source, NULL);
+    glCompileShader(*shader);
+    glGetShaderiv(*shader, GL_COMPILE_STATUS, &vertex_shader_compile_status);
+    if (!vertex_shader_compile_status) {
+        logger->e("shader_compile_status: %d", vertex_shader_compile_status);
+
+        GLint length = 0;
+        glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &length);
+
+        GLchar log[length];
+        glGetShaderInfoLog(*shader, length, &length, log);
+        logger->e("shader_compile_log: %s", log);
+
+        glDeleteShader(*shader);
+        return;
+    }
+}
+
+void nativelib::Engine::CreateProgram(GLuint vertexShader, GLuint fragmentShader, GLuint *program) {
+    GLint shader_program_link_status = GL_FALSE;
+    *program = glCreateProgram();
+    glAttachShader(*program, vertexShader);
+    glAttachShader(*program, fragmentShader);
+    glLinkProgram(*program);
+    glGetProgramiv(*program, GL_LINK_STATUS, &shader_program_link_status);
+    if (!shader_program_link_status) {
+        logger->e("shader_program_link_status: %d", shader_program_link_status);
+
+        GLint length = 0;
+        glGetProgramiv(*program, GL_INFO_LOG_LENGTH, &length);
+
+        GLchar log[length];
+        glGetProgramInfoLog(*program, length, &length, log);
+        logger->e("shader_program_link_status_log: %s", log);
+
+        glDeleteProgram(*program);
+        return;
+    }
 }
 

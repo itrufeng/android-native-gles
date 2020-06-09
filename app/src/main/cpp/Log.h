@@ -9,19 +9,21 @@
 
 using namespace std;
 
-class Log {
-public:
-    Log(const string tag);
-    void v(const char *fmt, ...);
-    void d(const char *fmt, ...);
-    void i(const char *fmt, ...);
-    void w(const char *fmt, ...);
-    void e(const char *fmt, ...);
-    void f(const char *fmt, ...);
+namespace nativelib {
+    class Log {
+    public:
+        Log(const string tag);
+        void v(const char *fmt, ...);
+        void d(const char *fmt, ...);
+        void i(const char *fmt, ...);
+        void w(const char *fmt, ...);
+        void e(const char *fmt, ...);
+        void f(const char *fmt, ...);
 
-private:
-    string tag;
-};
+    private:
+        string tag;
+    };
+}
 
 
 #endif //ANDROID_NATIVE_GLES_LOG_H

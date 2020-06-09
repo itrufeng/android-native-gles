@@ -2,8 +2,6 @@
 // Created by Jian Zhang on 5/26/20.
 //
 
-#include <EGL/egl.h>
-#include <GLES3/gl3.h>
 #include <android_native_app_glue.h>
 #include "Engine.h"
 
@@ -46,8 +44,6 @@ static void handle_cmd(struct android_app* app, int32_t cmd) {
 
 void android_main(struct android_app* state) {
     auto engine = new Engine();
-    // Make sure glue isn't stripped.
-    app_dummy();
     state->userData = engine;
     state->onAppCmd = handle_cmd;
     state->onInputEvent = handle_input;
