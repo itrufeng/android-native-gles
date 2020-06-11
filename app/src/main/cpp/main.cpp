@@ -43,11 +43,10 @@ static void handle_cmd(struct android_app* app, int32_t cmd) {
 }
 
 void android_main(struct android_app* state) {
-    auto engine = new Engine();
+    auto engine = new Engine(state);
     state->userData = engine;
     state->onAppCmd = handle_cmd;
     state->onInputEvent = handle_input;
-    engine->app = state;
     // loop waiting for stuff to do.
     while (1) {
         // Read all pending events.

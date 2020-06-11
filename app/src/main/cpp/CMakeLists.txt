@@ -17,7 +17,6 @@ add_library(
 
         main.cpp
         Engine.cpp
-        EGLHelper.cpp
         Log.cpp
 )
 
