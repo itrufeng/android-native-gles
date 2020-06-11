@@ -25,15 +25,15 @@ static void handle_cmd(struct android_app* app, int32_t cmd) {
             break;
         case APP_CMD_INIT_WINDOW:
             // The window is being shown, get it ready.
-            if (engine->isAppWindowCreated()) {
-                engine->init_display();
-                engine->prepare();
-                engine->draw_frame();
+            if (engine->IsAppWindowCreated()) {
+                engine->InitDisplay();
+                engine->Prepare();
+                engine->DrawFrame();
             }
             break;
         case APP_CMD_TERM_WINDOW:
             // The window is being hidden or closed, clean it up.
-            engine->destroy_display();
+            engine->DestroyDisplay();
             break;
         case APP_CMD_GAINED_FOCUS:
             break;
@@ -63,10 +63,10 @@ void android_main(struct android_app* state) {
             }
             // Check if we are exiting.
             if (state->destroyRequested != 0) {
-                engine->destroy_display();
+                engine->DestroyDisplay();
                 return;
             }
         }
-        engine->draw_frame();
+        engine->DrawFrame();
     }
 }
